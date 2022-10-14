@@ -1,0 +1,21 @@
+<odoo>
+    <record id="ph_attendance_tree" model="ir.ui.view">
+        <field name="name">ph.attendance.tree</field>
+        <field name="model">hr.attendance</field>
+        <field name="inherit_id" ref="hr_payroll.view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='worked_hours']" position="before">
+                <field name="ph_schedule"/>
+            </xpath>
+            
+            <xpath expr="//field[@name='worked_hours']" position="after">
+                <field name="ph_absent"/>
+                <field name="ph_late"/>
+                <field name="ph_undertime"/>
+                <field name="ph_overtime"/>
+                <field name="ph_ot_permit"/>
+                <field name="ph_on_leave"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

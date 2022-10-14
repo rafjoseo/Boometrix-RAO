@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="tax_table_m01" model="ph.tax.table">
+            <field name="sequence">1</field>
+            <field name="category">monthly</field>
+            <field name="floor">0.0</field>
+            <field name="ceiling">20833.00</field>
+            <field name="absolute">0.0</field>
+            <field name="rate">0.0</field>  
+        </record>
+    </data>
+</odoo>  
+        
+        

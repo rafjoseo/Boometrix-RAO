@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ph_payroll_ph_payslip_line_report,ph_payslip_line_report,model_ph_payslip_line_report,hr_payroll.group_hr_payroll_user,1,1,1,1
+access_ph_payroll_tax_table,ph.tax.table,model_ph_tax_table,hr_payroll.group_hr_payroll_user,1,1,1,1
+access_ph_payroll_philhealth_table,ph.philhealth.table,model_ph_philhealth_table,hr_payroll.group_hr_payroll_user,1,1,1,1
+access_ph_payroll_sss_table,ph.sss.table,model_ph_sss_table,hr_payroll.group_hr_payroll_user,1,1,1,1

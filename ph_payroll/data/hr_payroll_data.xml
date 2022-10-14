@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Salary Structure -->
+        <record id="ph_structure_001" model="hr.payroll.structure">
+            <field name="name">PH Regular Pay (semi-monthly)</field>
+            <field name="type_id" ref="hr_contract.structure_type_employee"/>
+            <field name="country_id" eval="False"/>
+        </record>
+        <record id="hr_contract.structure_type_employee" model="hr.payroll.structure.type">
+            <field name="default_struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <!-- Salary Rule Category -->
+        <record id="OVERTIME" model="hr.salary.rule.category">
+            <field name="name">Overtime</field>
+            <field name="code">OVERTIME</field>
+        </record>
+        <record id="WTAX" model="hr.salary.rule.category">
+            <field name="name">Withholding Taxes</field>
+            <field name="code">WTAX</field>
+            <field name="parent_id" ref="hr_payroll.DED"/>
+        </record>
+        <record id="STATUTORY" model="hr.salary.rule.category">
+            <field name="name">Statutory Contribution</field>
+            <field name="code">STATUTORY</field>
+            <field name="parent_id" ref="hr_payroll.DED"/>
+        </record>
+        <record id="SYS" model="hr.salary.rule.category">
+            <field name="name">System</field>
+            <field name="code">SYS</field>
+        </record>
+        
+        <!-- Salary Rules for PH Regular Pay (semi-monthly)-->
+        <record id="hr_salary_rule_overtime" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">OVERTIME</field>
+            <field name="category_id" ref="OVERTIME"/>
+            <field name="name">Overtime</field>
+            <field name="sequence" eval="10"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = inputs.OT.amount or 0.0 
+result_name = inputs.OT.name</field>
+            <field name="taxable" eval="True"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="hr_salary_rule_taxable_income" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">TAXINC</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">Taxable Income</field>
+            <field name="sequence" eval="169"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = taxable.value</field>
+            <field name="appears_on_payslip" eval="False"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_withholding_tax" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">WTAX</field>
+            <field name="category_id" ref="WTAX"/>
+            <field name="name">Withholding Tax</field>
+            <field name="sequence" eval="170"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">tax_table =  'monthly' if payslip.run_type == 'second' else 'semi_monthly' 
+result = compute_withholding_taxes(payslip, ph_payslip, taxable, tax_table)</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="hr_salary_rule_sss_gross" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">SSSGROSS</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">SSS Gross</field>
+            <field name="sequence" eval="146"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = ph_sss.value</field>
+            <field name="appears_on_payslip" eval="False"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_philhealth_gross" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">PHILGROSS</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">Philhealth Gross</field>
+            <field name="sequence" eval="147"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = ph_philhealth.value</field>
+            <field name="appears_on_payslip" eval="False"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="hr_salary_rule_sss_employee" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">SSSEE</field>
+            <field name="category_id" ref="STATUTORY"/>
+            <field name="name">SSS EE Contribution</field>
+            <field name="sequence" eval="150"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_sss_ee(payslip, ph_payslip, ph_sss, 'SSSEE')</field>
+            <field name="taxable" eval="True"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="hr_salary_rule_philhealth_employee" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">PHILEE</field>
+            <field name="category_id" ref="STATUTORY"/>
+            <field name="name">Philhealth EE Contribution</field>
+            <field name="sequence" eval="151"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_philhealth(payslip, ph_payslip, ph_philhealth)</field>
+            <field name="taxable" eval="True"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_pagibig_employee" model="hr.salary.rule">
+            <field name="amount_select">fix</field>
+            <field name="code">PAGEE</field>
+            <field name="category_id" ref="STATUTORY"/>
+            <field name="name">Pagibig EE Contribution</field>
+            <field name="sequence" eval="152"/>
+            <field eval="-100.0" name="amount_fix"/>
+            <field name="taxable" eval="True"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="hr_salary_rule_pagibig_employer" model="hr.salary.rule">
+            <field name="amount_select">fix</field>
+            <field eval="-100.0" name="amount_fix"/>
+            <field name="code">PAGER</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">Pagibig ER Contribution</field>
+            <field name="sequence" eval="152"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_wisp_employee" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">WISPEE</field>
+            <field name="category_id" ref="STATUTORY"/>
+            <field name="name">WISP EE Contribution</field>
+            <field name="sequence" eval="153"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_sss_ee(payslip, ph_payslip, ph_sss, 'WISPEE')</field>
+            <field name="taxable" eval="True"/>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_sss_employer" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">SSSER</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">SSS ER Contribution</field>
+            <field name="sequence" eval="156"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_sss_ee(payslip, ph_payslip, ph_sss, 'SSSER')</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_ec_employer" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">ECER</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">EC Contribution</field>
+            <field name="sequence" eval="156"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_sss_ee(payslip, ph_payslip, ph_sss, 'ECER')</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_wisp_employer" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">WISPER</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">WISP ER Contribution</field>
+            <field name="sequence" eval="156"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = compute_sss_ee(payslip, ph_payslip, ph_sss, 'WISPER')</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_philhealth_employer" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">PHILER</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">Philhealth ER Contribution</field>
+            <field name="sequence" eval="157"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = -ph_philhealth.value</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+
+        <record id="hr_salary_rule_total_deduction" model="hr.salary.rule">
+            <field name="amount_select">code</field>
+            <field name="code">TOTLDEDN</field>
+            <field name="category_id" ref="SYS"/>
+            <field name="name">Total Deduction</field>
+            <field name="sequence" eval="196"/>
+            <field eval="100.0" name="amount_percentage"/>
+            <field name="amount_python_compute">result = categories.DED</field>
+            <field name="struct_id" ref="ph_structure_001"/>
+        </record>
+        
+        <record id="input_overtime" model="hr.payslip.input.type">
+            <field name="name">Overtime</field>
+            <field name="code">OVERTIME</field>
+            <field name="country_id" eval="False"/>
+        </record>
+        <record id="input_night_diff" model="hr.payslip.input.type">
+            <field name="name">Night Differential</field>
+            <field name="code">ND</field>
+            <field name="country_id" eval="False"/>
+        </record>
+        <record id="input_absences" model="hr.payslip.input.type">
+            <field name="name">Absences</field>
+            <field name="code">ABSENCES</field>
+            <field name="country_id" eval="False"/>
+        </record>
+        <record id="input_late" model="hr.payslip.input.type">
+            <field name="name">Late</field>
+            <field name="code">LATE</field>
+            <field name="country_id" eval="False"/>
+        </record>
+        <record id="input_undertime" model="hr.payslip.input.type">
+            <field name="name">Undertime</field>
+            <field name="code">UNDERTIME</field>
+            <field name="country_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,28 @@
+<odoo>
+    <record id="ph_salary_rule_form" model="ir.ui.view">
+        <field name="name">ph.salary.rule.form</field>
+        <field name="model">hr.salary.rule</field>
+        <field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='appears_on_payslip']" position="after">
+                <field name="taxable"/>
+            </xpath>
+            <xpath expr="//field[@name='amount_percentage']" position="attributes">
+                <attribute name="attrs">{'invisible': &quot;[('amount_select', 'not in', ('percentage','code'))]&quot;,
+                    'required':&quot;[('amount_select','not in', ('percentage','code'))]&quot;}
+                </attribute>
+            </xpath>
+            <xpath expr="//page[@name='description']" position="before">
+                <page name="government" string="Government Contribution">
+                    <group name="contributions">
+                        <group string="Statutory">
+                            <field name="sss_contribution" string="Subject to SSS"/>
+                            <field name="philhealth_contribution" string="Subject to Philhealth"/>
+                            <field name="pagibig_contribution" string="Subject to Pagibig"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
